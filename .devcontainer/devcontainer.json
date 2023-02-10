@@ -1,0 +1,20 @@
+// See https://containers.dev/implementors/json_reference/ for configuration reference
+{
+	"name": "Development for Nostr raw event editor",
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
+	// "features": {},
+	// "forwardPorts": [8000],
+	"remoteUser": "node",
+	"postCreateCommand": "npm install",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"esbenp.prettier-vscode", 
+				"runem.lit-plugin",
+				"dbaeumer.vscode-eslint"
+			]
+		}
+	}
+}
