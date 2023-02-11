@@ -22,7 +22,7 @@ class PlaceholderWidget extends WidgetType {
     border: 1px solid blue;
     border-radius: 4px;
     padding: 0 3px;
-    background: lightblue;`;
+    background: transparent;`;
     elt.textContent = this.name;
     return elt;
   }

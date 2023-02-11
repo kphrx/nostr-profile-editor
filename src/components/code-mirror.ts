@@ -5,7 +5,6 @@ import { minimalSetup } from 'codemirror';
 import { EditorView, lineNumbers, gutter } from '@codemirror/view';
 import { EditorState } from '@codemirror/state';
 import { json } from '@codemirror/lang-json';
-import { basicLight as theme } from 'cm6-theme-basic-light';
 
 import { eventPreview } from '../extensions/event-preview.js';
 import { placeholders } from '../extensions/placeholders.js';
@@ -33,10 +32,10 @@ export class CodeMirror extends LitElement {
 
   firstUpdated() {
     const extensions = [
+      EditorView.contentAttributes.of({ 'aria-label': 'Editor' }),
       placeholders,
       eventPreview(),
       minimalSetup,
-      theme,
       lineNumbers(),
       gutter({ class: 'cm-gutter' }),
       json(),
