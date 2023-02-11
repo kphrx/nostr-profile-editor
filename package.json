@@ -19,6 +19,10 @@
     "start": "tsc && concurrently -k -r \"tsc --watch --preserveWatchOutput\" \"wds\""
   },
   "dependencies": {
+    "@codemirror/lang-json": "^6.0.1",
+    "@codemirror/state": "^6.2.0",
+    "@codemirror/view": "^6.8.1",
+    "codemirror": "^6.0.1",
     "lit": "^2.0.2"
   },
   "devDependencies": {
@@ -71,7 +75,8 @@
         {
           "ignorePackages": true
         }
-      ]
+      ],
+      "wc/guard-super-call": "off"
     }
   },
   "prettier": {
