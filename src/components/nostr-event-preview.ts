@@ -2,25 +2,6 @@ import { LitElement, html, css } from 'lit';
 import type { PropertyValues } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
-import { showPanel } from '@codemirror/view';
-
-export function eventPreview() {
-  return showPanel.of(view => {
-    const dom = document.createElement('nostr-event-preview');
-    dom.setAttribute('content', view.state.doc.toString());
-
-    return {
-      dom,
-      update(update) {
-        if (update.docChanged) {
-          dom.setAttribute('content', update.state.doc.toString());
-        }
-      },
-      top: true,
-    };
-  });
-}
-
 const PreviewMessages = {
   Checking: 'Checking NIP-07 extension...',
   Require: 'Require NIP-07 extension.',

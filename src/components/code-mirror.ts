@@ -7,7 +7,8 @@ import { EditorState } from '@codemirror/state';
 import { json } from '@codemirror/lang-json';
 import { basicLight as theme } from 'cm6-theme-basic-light';
 
-import { eventPreview } from './nostr-event-preview.js';
+import { eventPreview } from '../extensions/event-preview.js';
+import { placeholders } from '../extensions/placeholders.js';
 
 @customElement('code-mirror')
 export class CodeMirror extends LitElement {
@@ -22,7 +23,7 @@ export class CodeMirror extends LitElement {
 
   @property({ type: String })
   defaultContent =
-    '{"name": <username>, "about": <string>, "picture": <url, string>}';
+    '{"name": "[[username]]", "about": "[[string]]", "picture": "[[url]]"}';
 
   editor?: EditorView;
 
@@ -32,6 +33,7 @@ export class CodeMirror extends LitElement {
 
   firstUpdated() {
     const extensions = [
+      placeholders,
       eventPreview(),
       minimalSetup,
       theme,
@@ -39,7 +41,10 @@ export class CodeMirror extends LitElement {
       gutter({ class: 'cm-gutter' }),
       json(),
     ];
-    const state = EditorState.create({ doc: this.defaultContent, extensions });
+    const state = EditorState.create({
+      doc: JSON.stringify(JSON.parse(this.defaultContent), null, 4),
+      extensions,
+    });
     this.editor = new EditorView({
       state,
       parent: this.shadowRoot?.querySelector('div.editor')!,
