@@ -1,6 +1,8 @@
 import { LitElement, html, css } from 'lit';
 import { property, customElement } from 'lit/decorators.js';
 
+import './components/code-mirror.js';
+
 @customElement('editor-app')
 export class EditorApp extends LitElement {
   @property({ type: String }) header = 'Nostr raw profile editor';
@@ -39,7 +41,9 @@ export class EditorApp extends LitElement {
         <h1>${this.header}</h1>
       </header>
 
-      <main></main>
+      <main>
+        <code-mirror></code-mirror>
+      </main>
 
       <footer>
         <small>&copy; 2023 @kphrx</small>
