@@ -17,6 +17,10 @@ export class NostrEventPreview extends LitElement {
       line-height: 1em;
       height: 1em;
     }
+    pre {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
   `;
 
   @state()
