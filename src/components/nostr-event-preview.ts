@@ -2,6 +2,8 @@ import { LitElement, html, css } from 'lit';
 import type { PropertyValues } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
+import nostrApi from '../utils/nostr-api.js';
+
 const PreviewMessages = {
   Checking: 'Checking NIP-07 extension...',
   Require: 'Require NIP-07 extension.',
@@ -124,6 +126,23 @@ export class NostrEventPreview extends LitElement {
     return html`<button @click=${() => this.#signEvent()}>Sign</button>`;
   }
 
+  async #fetchKind0Event() {
+    const { events } = await nostrApi.requestKinds(this.publicKey!, 0);
+    console.log(...events);
+  }
+
+  fetchProfileButton() {
+    if (
+      this.message === PreviewMessages.Checking ||
+      this.message === PreviewMessages.Require
+    ) {
+      return '';
+    }
+    return html`<button @click=${() => this.#fetchKind0Event()}>
+      Fetch current profile
+    </button>`;
+  }
+
   preformatResult() {
     if (
       this.message === PreviewMessages.Checking ||
@@ -137,6 +156,7 @@ export class NostrEventPreview extends LitElement {
   render() {
     return html`
       <div>
+        <div>${this.fetchProfileButton()}</div>
         ${this.preformatResult()}
         <div>${this.signButton()} ${this.previewMessage()}</div>
       </div>
