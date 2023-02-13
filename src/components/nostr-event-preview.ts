@@ -51,7 +51,7 @@ export class NostrEventPreview extends LitElement {
       throw Error('invalid profile json');
     }
     return {
-      created_at: Date.now(),
+      created_at: Math.round(Date.now() / 1000),
       kind: 0,
       tags: [],
       content,
