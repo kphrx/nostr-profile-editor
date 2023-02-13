@@ -1,4 +1,4 @@
-import type { NostrEvent, PartialNostrEvent } from '../src/utils/nostr-types';
+import type { NostrEvent, PartialNostrEvent } from './utils/nostr-types';
 
 declare global {
   interface Window {
