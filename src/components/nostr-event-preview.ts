@@ -5,12 +5,14 @@ import { customElement, property, state } from 'lit/decorators.js';
 const PreviewMessages = {
   Checking: 'Checking NIP-07 extension...',
   Require: 'Require NIP-07 extension.',
+  FailedSigning: 'Failed signing event.',
 };
 
 @customElement('nostr-event-preview')
 export class NostrEventPreview extends LitElement {
   static styles = css`
     p {
+      display: inline-block;
       margin: 0;
       line-height: 1em;
       height: 1em;
@@ -86,6 +88,21 @@ export class NostrEventPreview extends LitElement {
     }
   }
 
+  async #signEvent() {
+    let event = JSON.parse(this.result);
+    try {
+      event = await window.nostr?.signEvent(event);
+      if (event == null) {
+        this.message = PreviewMessages.FailedSigning;
+        return;
+      }
+    } catch {
+      this.message = PreviewMessages.FailedSigning;
+      return;
+    }
+    this.result = JSON.stringify(event, null, 4);
+  }
+
   async #getEventHash() {
     const event = this.#currentEvent;
     const pubkey = this.publicKey!;
@@ -142,6 +159,16 @@ export class NostrEventPreview extends LitElement {
     return html`<p>${this.message}</p>`;
   }
 
+  signButton() {
+    if (
+      this.message === PreviewMessages.Checking ||
+      this.message === PreviewMessages.Require
+    ) {
+      return '';
+    }
+    return html`<button @click=${() => this.#signEvent()}>Sign</button>`;
+  }
+
   preformatResult() {
     if (
       this.message === PreviewMessages.Checking ||
@@ -154,7 +181,10 @@ export class NostrEventPreview extends LitElement {
 
   render() {
     return html`
-      <div>${this.preformatResult()} ${this.previewMessage()}</div>
+      <div>
+        ${this.preformatResult()}
+        <div>${this.signButton()} ${this.previewMessage()}</div>
+      </div>
     `;
   }
 }
