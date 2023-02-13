@@ -60,20 +60,6 @@ export class NostrEventPreview extends LitElement {
     };
   }
 
-  willUpdate(changedProperties: PropertyValues<this>) {
-    if (this.publicKey == null) {
-      return;
-    }
-    if (
-      changedProperties.has('content') ||
-      changedProperties.has('publicKey')
-    ) {
-      this.#getEventHash().catch((e: Error) => {
-        this.message = e.message;
-      });
-    }
-  }
-
   async #getPublicKey() {
     try {
       const pubkey = await window.nostr?.getPublicKey();
@@ -86,6 +72,31 @@ export class NostrEventPreview extends LitElement {
     } catch {
       this.message = PreviewMessages.Require;
     }
+  }
+
+  #checkNip07(timeout: number, recursive: number = 0) {
+    if (window.nostr != null) {
+      this.#getPublicKey();
+      return;
+    }
+    if (recursive >= 10) {
+      this.message = PreviewMessages.Require;
+      return;
+    }
+    setTimeout(() => this.#checkNip07(timeout * 2, recursive + 1), timeout * 2);
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    if (window.nostr != null) {
+      this.#getPublicKey();
+      return;
+    }
+    setTimeout(() => this.#checkNip07(100), 100);
+  }
+
+  previewMessage() {
+    return html`<p>${this.message}</p>`;
   }
 
   async #signEvent() {
@@ -101,6 +112,35 @@ export class NostrEventPreview extends LitElement {
       return;
     }
     this.result = JSON.stringify(event, null, 4);
+  }
+
+  signButton() {
+    if (
+      this.message === PreviewMessages.Checking ||
+      this.message === PreviewMessages.Require
+    ) {
+      return '';
+    }
+    return html`<button @click=${() => this.#signEvent()}>Sign</button>`;
+  }
+
+  preformatResult() {
+    if (
+      this.message === PreviewMessages.Checking ||
+      this.message === PreviewMessages.Require
+    ) {
+      return '';
+    }
+    return html`<pre><code>${this.result}</code></pre>`;
+  }
+
+  render() {
+    return html`
+      <div>
+        ${this.preformatResult()}
+        <div>${this.signButton()} ${this.previewMessage()}</div>
+      </div>
+    `;
   }
 
   async #getEventHash() {
@@ -134,57 +174,17 @@ export class NostrEventPreview extends LitElement {
     );
   }
 
-  connectedCallback() {
-    super.connectedCallback();
-    if (window.nostr != null) {
-      this.#getPublicKey();
+  willUpdate(changedProperties: PropertyValues<this>) {
+    if (this.publicKey == null) {
       return;
     }
-    setTimeout(() => this.#checkNip07(100), 100);
-  }
-
-  #checkNip07(timeout: number, recursive: number = 0) {
-    if (window.nostr != null) {
-      this.#getPublicKey();
-      return;
-    }
-    if (recursive >= 10) {
-      this.message = PreviewMessages.Require;
-      return;
-    }
-    setTimeout(() => this.#checkNip07(timeout * 2, recursive + 1), timeout * 2);
-  }
-
-  previewMessage() {
-    return html`<p>${this.message}</p>`;
-  }
-
-  signButton() {
     if (
-      this.message === PreviewMessages.Checking ||
-      this.message === PreviewMessages.Require
+      changedProperties.has('content') ||
+      changedProperties.has('publicKey')
     ) {
-      return '';
+      this.#getEventHash().catch((e: Error) => {
+        this.message = e.message;
+      });
     }
-    return html`<button @click=${() => this.#signEvent()}>Sign</button>`;
-  }
-
-  preformatResult() {
-    if (
-      this.message === PreviewMessages.Checking ||
-      this.message === PreviewMessages.Require
-    ) {
-      return '';
-    }
-    return html`<pre><code>${this.result}</code></pre>`;
-  }
-
-  render() {
-    return html`
-      <div>
-        ${this.preformatResult()}
-        <div>${this.signButton()} ${this.previewMessage()}</div>
-      </div>
-    `;
   }
 }
