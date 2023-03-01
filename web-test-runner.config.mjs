@@ -38,4 +38,9 @@ export default /** @type {import("@web/test-runner").TestRunnerConfig} */ ({
   // ],
 
   // See documentation for all available options
+  testFramework: {
+    config: {
+      timeout: 5000,
+    }
+  }
 });
