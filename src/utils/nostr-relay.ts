@@ -5,6 +5,7 @@ interface NostrRelayEventMap {
   error: Event;
   message: MessageEvent;
   open: Event;
+  init: CustomEvent;
 }
 
 interface EventListenerOptions {
@@ -52,10 +53,16 @@ export class NostrRelay extends EventTarget {
 
   #socket?: WebSocket;
 
+  #manuallyClose = false;
+
   cannotConnect = false;
 
+  get readyState() {
+    return this.#socket?.readyState ?? -1;
+  }
+
   get hasConnection() {
-    return (this.#socket?.readyState ?? -1) === WebSocket.OPEN;
+    return this.readyState === WebSocket.OPEN;
   }
 
   constructor(domain: string) {
@@ -76,23 +83,35 @@ export class NostrRelay extends EventTarget {
     } catch {
       this.cannotConnect = true;
     }
+
+    this.dispatchEvent(new CustomEvent('init'));
   }
 
   #connect() {
     const ws = new WebSocket(`wss://${this.relay}/`);
-    ws.addEventListener('open', this.dispatchEvent);
-    ws.addEventListener('message', this.dispatchEvent);
+    ws.addEventListener('open', e => this.dispatchEvent(new Event(e.type, e)));
+    ws.addEventListener('message', e =>
+      this.dispatchEvent(new MessageEvent(e.type, { ...e, ports: [] }))
+    );
     ws.addEventListener('error', e => {
-      ws.close(4000, e.type);
-      this.dispatchEvent(e);
+      this.dispatchEvent(new Event(e.type, e));
+      ws.close();
     });
     ws.addEventListener('close', e => {
-      this.dispatchEvent(e);
+      if (this.#manuallyClose) {
+        this.dispatchEvent(new CloseEvent(e.type, e));
+        return;
+      }
       setTimeout(() => {
         this.#connect();
       }, 1000);
     });
     this.#socket = ws;
+  }
+
+  close() {
+    this.#manuallyClose = true;
+    this.#socket?.close();
   }
 
   send(data: string | ArrayBufferLike | Blob | ArrayBufferView) {
